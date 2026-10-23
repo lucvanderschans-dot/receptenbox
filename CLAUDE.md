@@ -10,8 +10,9 @@ This is a learning project that must be built to production standards. Prefer th
 
 ## Stack
 
-- Next.js (App Router) + TypeScript in strict mode
-- pnpm
+- Next.js 16 (App Router) + TypeScript in strict mode. Next.js 16 differs from older versions; read `AGENTS.md` and the docs in `node_modules/next/dist/docs/` before using an unfamiliar API.
+- Tailwind CSS v4 for styling
+- pnpm (version pinned in `package.json`), Node 24
 - PostgreSQL with Drizzle ORM and SQL migrations
 - Better Auth for authentication
 - Zod for all input validation
@@ -23,22 +24,33 @@ This is a learning project that must be built to production standards. Prefer th
 
 ## Commands
 
-> Update this section as soon as the scaffolding exists, so it never lies.
+> Keep this section in sync with `package.json`, so it never lies.
 
 ```bash
 pnpm install        # install dependencies
-pnpm dev            # start dev server
+pnpm dev            # start dev server (http://localhost:3000)
 pnpm lint           # ESLint
-pnpm typecheck      # tsc --noEmit
-pnpm test           # Vitest
-pnpm test:e2e       # Playwright
+pnpm typecheck      # next typegen + tsc --noEmit
+pnpm test           # Vitest, single run
+pnpm test:watch     # Vitest in watch mode
+pnpm format         # Prettier, write
+pnpm format:check   # Prettier, check only
 pnpm build          # production build
-docker compose up -d   # start local Postgres
-pnpm db:generate    # create a migration from schema changes
-pnpm db:migrate     # apply migrations
+pnpm start          # serve the production build
 ```
 
-Before declaring any task done, run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, and fix failures.
+Not available yet:
+
+```bash
+docker compose up -d   # start local Postgres (phase 2)
+pnpm db:generate       # create a migration from schema changes (phase 2)
+pnpm db:migrate        # apply migrations (phase 2)
+pnpm test:e2e          # Playwright (phase 3)
+```
+
+Before declaring any task done, run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, and fix failures.
+
+Unit tests live next to the code they test as `*.test.ts(x)` under `src/`.
 
 ## Project structure
 
@@ -46,13 +58,20 @@ Keep this section in sync with reality.
 
 ```
 src/app/          routes, layouts, server actions
-src/components/   reusable UI components
-src/lib/          shared helpers (auth, config, utils)
-src/db/           Drizzle schema, migrations, queries
-src/server/       business logic and authorization (no UI code)
-tests/            e2e tests
-docs/             PLAN.md, DECISIONS.md, runbook
+src/lib/          shared helpers (auth, config, utils); site.ts holds app name and page titles
+docs/             PLAN.md, DECISIONS.md (runbook follows in phase 9)
 ```
+
+Planned, created when first needed:
+
+```
+src/components/   reusable UI components
+src/db/           Drizzle schema, migrations, queries (phase 2)
+src/server/       business logic and authorization, no UI code (phase 5)
+tests/            Playwright e2e tests (phase 3)
+```
+
+Root config: `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `.prettierrc.json`, `vitest.config.mts`, `pnpm-workspace.yaml` (pnpm build-script allowlist). `AGENTS.md` is managed by `next dev`; do not edit it by hand.
 
 ## Rules
 
