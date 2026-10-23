@@ -42,21 +42,21 @@ Gevolg: multi-tenant vanaf dag één. Elke rij data hoort bij een huishouden.
 
 ## 6. Techstack
 
-| Onderdeel | Keuze |
-|---|---|
-| Framework | Next.js (App Router) + TypeScript (strict) |
-| Package manager | pnpm |
-| Database | PostgreSQL |
-| ORM en migraties | Drizzle |
-| Auth | Better Auth |
-| Validatie | Zod |
-| Unit tests | Vitest |
-| End-to-end tests | Playwright |
-| Kwaliteit | ESLint + Prettier |
-| CI/CD | GitHub Actions |
-| Lokale omgeving | Docker Compose (Postgres) |
-| Hosting | Vercel (app) + Neon (Postgres), later eventueel zelfbeheerd |
-| Monitoring | Sentry |
+| Onderdeel        | Keuze                                                       |
+| ---------------- | ----------------------------------------------------------- |
+| Framework        | Next.js (App Router) + TypeScript (strict)                  |
+| Package manager  | pnpm                                                        |
+| Database         | PostgreSQL                                                  |
+| ORM en migraties | Drizzle                                                     |
+| Auth             | Better Auth                                                 |
+| Validatie        | Zod                                                         |
+| Unit tests       | Vitest                                                      |
+| End-to-end tests | Playwright                                                  |
+| Kwaliteit        | ESLint + Prettier                                           |
+| CI/CD            | GitHub Actions                                              |
+| Lokale omgeving  | Docker Compose (Postgres)                                   |
+| Hosting          | Vercel (app) + Neon (Postgres), later eventueel zelfbeheerd |
+| Monitoring       | Sentry                                                      |
 
 Keuzes mogen later herzien worden, maar leg elke wijziging vast in `docs/DECISIONS.md` met reden.
 
@@ -84,19 +84,19 @@ Regel: elke tabel met gebruikersdata heeft een `household_id`, en elke query fil
 
 ## 9. Fasering
 
-| Fase | Inhoud | Klaar als |
-|---|---|---|
-| 0 | Repo, CLAUDE.md, PLAN.md, branch protection | Repo staat, main is beschermd |
-| 1 | Projectskelet: Next.js, TypeScript, lint, Vitest | `pnpm dev`, `pnpm test`, `pnpm build` werken |
-| 2 | Docker + Postgres + Drizzle + eerste migratie | App praat met lokale database |
-| 3 | CI-pipeline | Pull requests draaien lint, typecheck, test, build |
-| 4 | Eerste deploy (leeg) | App draait op een echte URL met productiedatabase |
-| 5 | Auth + huishoudens + autorisatietests | Gebruiker kan inloggen, ziet alleen eigen huishouden |
-| 6 | Recepten (MVP-feature 3) | CRUD werkt, getest |
-| 7 | Voorraad en "wat kan ik koken?" | Matching werkt, getest |
-| 8 | Boodschappenlijst | Gedeeld, afvinkbaar |
-| 9 | Productie-klaar: Sentry, back-ups, security headers, eigen domein | Checklist hieronder afgevinkt |
-| 10 | Post-MVP features | Per stuk in eigen branch |
+| Fase | Inhoud                                                            | Klaar als                                            |
+| ---- | ----------------------------------------------------------------- | ---------------------------------------------------- |
+| 0    | Repo, CLAUDE.md, PLAN.md, branch protection                       | Repo staat, main is beschermd                        |
+| 1    | Projectskelet: Next.js, TypeScript, lint, Vitest                  | `pnpm dev`, `pnpm test`, `pnpm build` werken         |
+| 2    | Docker + Postgres + Drizzle + eerste migratie                     | App praat met lokale database                        |
+| 3    | CI-pipeline                                                       | Pull requests draaien lint, typecheck, test, build   |
+| 4    | Eerste deploy (leeg)                                              | App draait op een echte URL met productiedatabase    |
+| 5    | Auth + huishoudens + autorisatietests                             | Gebruiker kan inloggen, ziet alleen eigen huishouden |
+| 6    | Recepten (MVP-feature 3)                                          | CRUD werkt, getest                                   |
+| 7    | Voorraad en "wat kan ik koken?"                                   | Matching werkt, getest                               |
+| 8    | Boodschappenlijst                                                 | Gedeeld, afvinkbaar                                  |
+| 9    | Productie-klaar: Sentry, back-ups, security headers, eigen domein | Checklist hieronder afgevinkt                        |
+| 10   | Post-MVP features                                                 | Per stuk in eigen branch                             |
 
 ## 10. Productie-checklist (fase 9)
 

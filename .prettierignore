@@ -1,0 +1,7 @@
+# Generated or managed by tools
+pnpm-lock.yaml
+next-env.d.ts
+.next/
+out/
+coverage/
+AGENTS.md
