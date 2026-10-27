@@ -1,0 +1,24 @@
+# Local development database only. Production runs on Neon (see docs/PLAN.md).
+# The credentials below are local dev values, not secrets.
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: receptenbox
+      POSTGRES_PASSWORD: receptenbox
+      POSTGRES_DB: receptenbox
+    ports:
+      # Bound to localhost only, so the database is not reachable from the network.
+      # Host port 5433 avoids clashing with a locally installed Postgres on 5432.
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U receptenbox -d receptenbox"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:
