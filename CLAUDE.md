@@ -37,14 +37,18 @@ pnpm format         # Prettier, write
 pnpm format:check   # Prettier, check only
 pnpm build          # production build
 pnpm start          # serve the production build
+pnpm db:generate    # create a SQL migration from schema changes (review it before committing)
+pnpm db:migrate     # apply pending migrations to DATABASE_URL
+pnpm db:studio      # browse the database in Drizzle Studio
+docker compose up -d --wait   # start local Postgres on 127.0.0.1:5433
+docker compose down           # stop it (add -v to also delete the data)
 ```
+
+Local setup: copy `.env.example` to `.env.local`, start Postgres, run `pnpm db:migrate`. `GET /api/health` reports whether the app reaches the database. Never use `drizzle-kit push`; every schema change goes through a migration.
 
 Not available yet:
 
 ```bash
-docker compose up -d   # start local Postgres (phase 2)
-pnpm db:generate       # create a migration from schema changes (phase 2)
-pnpm db:migrate        # apply migrations (phase 2)
 pnpm test:e2e          # Playwright (phase 3)
 ```
 
@@ -57,8 +61,10 @@ Unit tests live next to the code they test as `*.test.ts(x)` under `src/`.
 Keep this section in sync with reality.
 
 ```
-src/app/          routes, layouts, server actions
-src/lib/          shared helpers (auth, config, utils); site.ts holds app name and page titles
+src/app/          routes, layouts, server actions; api/health is the database health check
+src/lib/          shared helpers (auth, config, utils); site.ts holds app name and page titles,
+                  env.ts validates server environment variables
+src/db/           schema.ts (Drizzle schema), index.ts (lazy getDb()), migrations/ (generated SQL)
 docs/             PLAN.md, DECISIONS.md (runbook follows in phase 9)
 ```
 
@@ -66,12 +72,11 @@ Planned, created when first needed:
 
 ```
 src/components/   reusable UI components
-src/db/           Drizzle schema, migrations, queries (phase 2)
 src/server/       business logic and authorization, no UI code (phase 5)
 tests/            Playwright e2e tests (phase 3)
 ```
 
-Root config: `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `.prettierrc.json`, `vitest.config.mts`, `pnpm-workspace.yaml` (pnpm build-script allowlist). `AGENTS.md` is managed by `next dev`; do not edit it by hand.
+Root config: `next.config.ts`, `drizzle.config.ts`, `docker-compose.yml`, `.env.example`, `tsconfig.json`, `eslint.config.mjs`, `.prettierrc.json`, `vitest.config.mts`, `pnpm-workspace.yaml` (pnpm build-script allowlist). `AGENTS.md` is managed by `next dev`; do not edit it by hand.
 
 ## Rules
 
