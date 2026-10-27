@@ -14,7 +14,11 @@ export type Database = NodePgDatabase<typeof schema> & { $client: Pool };
 const globalForDb = globalThis as typeof globalThis & { receptenboxDb?: Database };
 
 function createDb(): Database {
-  const pool = new Pool({ connectionString: getServerEnv().DATABASE_URL });
+  const pool = new Pool({
+    connectionString: getServerEnv().DATABASE_URL,
+    // Fail fast instead of hanging when the database is unreachable.
+    connectionTimeoutMillis: 5_000,
+  });
 
   // An idle client can fail (e.g. the database restarts). Without a listener
   // that error would crash the process; the pool replaces the client itself.
