@@ -1,5 +1,6 @@
 # Generated or managed by tools
 pnpm-lock.yaml
+src/db/migrations/
 next-env.d.ts
 .next/
 out/

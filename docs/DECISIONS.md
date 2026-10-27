@@ -53,3 +53,55 @@ Elke significante keuze met datum, beslissing en reden. Nieuwste onderaan. Herzi
 
 **Beslissing:** Playwright komt in fase 3, samen met de CI-pipeline.
 **Reden:** fase 1 vraagt er niet om en de eerste echte gebruikersflow komt pas in fase 5. Zo zetten we e2e-tests één keer goed op, ook meteen in CI.
+
+## 2026-10-27: Database (fase 2)
+
+### node-postgres (`pg`) als driver
+
+**Beslissing:** Drizzle praat met Postgres via `pg` (node-postgres) en een gedeelde `Pool`.
+**Reden:** de meest gebruikte driver, met directe ondersteuning in Better Auth (fase 5) en werkend met Neon via een gewone verbindingsstring. Neon's serverless-driver kan later nog. Dat wordt dan een nieuwe beslissing, op basis van gemeten verbindingsproblemen.
+
+### Lokale Postgres: `postgres:17` (Debian), niet Alpine
+
+**Beslissing:** Docker Compose gebruikt het image `postgres:17`, gebaseerd op Debian.
+**Reden:** hoofdversie 17 is de standaard bij Neon, dus lokaal en productie gedragen zich hetzelfde. Alpine gebruikt musl in plaats van glibc. Daardoor sorteren tekstvergelijkingen en collations (bijvoorbeeld voor ingrediëntnamen met accenten) anders dan op Neon, wat een bron van lastig te vinden verschillen is. Het grotere image is lokaal geen probleem.
+
+### Database alleen op 127.0.0.1:5433
+
+**Beslissing:** de container publiceert Postgres op `127.0.0.1:5433`, niet op `5432` en niet op alle interfaces.
+**Reden:** alleen localhost voorkomt dat de database met het dev-wachtwoord vanaf het netwerk bereikbaar is. Op de dev-machine draait al een Postgres op 5432. Met dezelfde poort zou de container falen, of zou de app ongemerkt met de verkeerde database praten.
+
+### Env-validatie met Zod, zonder waarden in foutmeldingen
+
+**Beslissing:** `src/lib/env.ts` valideert de omgevingsvariabelen van de server (nu `DATABASE_URL`) met Zod, lui bij eerste gebruik. De foutmelding noemt alleen de naam van de variabele en de reden. De waarde en de `ZodError` zitten er nooit in, dat is getest.
+**Reden:** een ontbrekende of verkeerde URL geeft zo direct een duidelijke fout in plaats van een vage verbindingsfout. `DATABASE_URL` bevat een wachtwoord en foutmeldingen belanden in logs.
+
+### Database-client en env lui aangemaakt
+
+**Beslissing:** `getDb()` maakt de pool pas bij het eerste gebruik aan en bewaart hem op `globalThis`.
+**Reden:** `pnpm build` heeft zo geen database en geen `DATABASE_URL` nodig, wat CI en deploys eenvoudiger maakt. Door `globalThis` maakt hot reload in development niet bij elke wijziging een nieuwe pool aan.
+
+### Schema: uuid-id's, expliciete snake_case, check-constraints
+
+**Beslissing:** primary keys zijn `uuid` met `gen_random_uuid()`. Kolomnamen staan expliciet in snake_case in het Drizzle-schema. Eenvoudige invoerregels (zoals de lengte van een huishoudnaam) staan ook als check-constraint in de database.
+**Reden:** uuid's zijn niet te raden of op te sommen in URL's. Expliciete namen maken de gegenereerde SQL voorspelbaar zonder casing-magie. De constraint is een vangnet als code ooit Zod overslaat.
+
+### Alleen migraties, geen `drizzle-kit push`
+
+**Beslissing:** er zijn scripts voor `db:generate`, `db:migrate` en `db:studio`, maar niet voor `push`. Gegenereerde migraties worden gecommit en nagelezen, en staan in `.prettierignore`.
+**Reden:** `push` wijzigt de database zonder migratiebestand, en dat verbiedt CLAUDE.md. De bestanden in `meta/` zijn tool-output. Als Prettier ze herformatteert, ontstaat ruis bij elke nieuwe migratie.
+
+### drizzle.config.ts laadt `.env.local` alleen als het bestaat
+
+**Beslissing:** de config gebruikt Node's ingebouwde `process.loadEnvFile`, alleen als `.env.local` bestaat, zonder `dotenv`.
+**Reden:** in CI en bij deploys komen de variabelen uit de omgeving en is er geen bestand. `loadEnvFile` overschrijft geen variabelen die al gezet zijn, dus de omgeving wint altijd.
+
+### Health check per request via `connection()`
+
+**Beslissing:** `GET /api/health` roept eerst `await connection()` aan, doet daarna `select 1`, en geeft alleen `{"status":"ok"}` of `{"status":"error"}` terug met `Cache-Control: no-store`. De pool heeft een verbindingstimeout van 5 seconden.
+**Reden:** met `cacheComponents` prerendert Next.js een `GET`-handler tijdens de build tot hij een runtime-API raakt. Zonder `connection()` zou de build de query proberen uit te voeren. De docs raden `io()` aan voor content die mag cachen, maar een health check moet altijd een echte request afwachten. Foutdetails gaan alleen naar de serverlog. De timeout zorgt dat een onbereikbare database snel een 503 geeft in plaats van een hangende request.
+
+### Database-integratietests in fase 3
+
+**Beslissing:** `pnpm test` blijft zonder database draaien. De databasecode is nu alleen met mocks getest en handmatig tegen de lokale container.
+**Reden:** integratietests tegen een echte Postgres horen bij de CI-pipeline (fase 3), met een Postgres-service in GitHub Actions. Zo hangt `pnpm test` nu niet af van een draaiende Docker.
